@@ -13,22 +13,18 @@ import {
   StyledSwiper,
   StyledSwiperSlide,
 } from "./Slider.styled";
-import { useEffect, useState, useRef } from "react";
-import { VideoProps, VideosProps } from "../../types/videos";
+import {useEffect, useState, useRef, useCallback} from "react";
+import { VideosProps } from "../../types/videos";
 
 interface SliderProps {
   topMovies: MovieProps[];
 }
 
-const getLastIndex = (arr: VideoProps[]): number => {
-  return arr.length - 1;
-};
-
 const Slider = ({ topMovies }: SliderProps) => {
   const [videoKey, setVideoKey] = useState<string | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
 
-  const timeOutRef = useRef<any | null>(null)
+  const timeOutRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     if (topMovies.length) {
@@ -47,36 +43,35 @@ const Slider = ({ topMovies }: SliderProps) => {
       )
         .then((response) => response.json())
         .then((response: VideosProps) => {
-          const videoLink = `https://www.youtube.com/embed/${response.results[response.results.length - 1].key}?autoplay=1&mute=1&controls=0&disablekb=1&loop=1&playlist=2m1drlOZSDw&start=30`
+          const videoLink = `https://www.youtube.com/embed/${response.results[response.results.length - 1].key}?autoplay=1&mute=1&controls=0&disablekb=1&loop=1&start=30`
           timeOutRef.current = setTimeout(() => setVideoKey(videoLink), 5000);
         })
         .catch((err) => console.error(err));
-        return () => clearTimeout(timeOutRef!.current)
+        return () => clearTimeout(timeOutRef.current as number)
     }
   }, [topMovies, slideIndex]);
 
-  const renderSliderData = (index: number, item: MovieProps) => {
-    if (videoKey && index === slideIndex) {
-      console.log(videoKey);
+  const renderSliderData = useCallback((item: MovieProps) => {
+    if (!videoKey) {
       return (
-        <StyledIFrame
-          key={videoKey}
-          id="ytplayer"
-          width="100%"
-          height="100%"
-          src={videoKey}
-          frameBorder="0"
-          allowFullScreen
-        />
-      );
+          <StyledImg
+              src={`https://image.tmdb.org/t/p/original${item.backdrop_path}`}
+              alt=""
+          />
+      )
     }
     return (
-      <StyledImg
-        src={`https://image.tmdb.org/t/p/original${item.backdrop_path}`}
-        alt=""
-      />
+        <StyledIFrame
+            key={videoKey}
+            id="ytplayer"
+            width="100%"
+            height="100%"
+            src={videoKey}
+            frameBorder="0"
+            allowFullScreen
+        />
     );
-  };
+  }, [videoKey]);
 
   if (!topMovies) {
     return <h1>Загрузка</h1>;
@@ -93,12 +88,15 @@ const Slider = ({ topMovies }: SliderProps) => {
           keyboard={true}
           loop={true}
           modules={[Navigation, Pagination, Mousewheel, Keyboard]}
-          onSlideChange={(e) => setSlideIndex(e.activeIndex)}
+          onSlideChange={(e) => {
+            setVideoKey(null)
+            setSlideIndex(e.activeIndex)
+          }}
         >
-          {topMovies.map((item, index) => {
+          {topMovies.map(item => {
             return (
               <StyledSwiperSlide key={item.id}>
-                {renderSliderData(index, item)}
+                {renderSliderData(item)}
                 <StyledSliderBlock>
                   <StyledSliderDescription>
                     <h1>{item.title}</h1>

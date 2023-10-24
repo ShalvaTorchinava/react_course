@@ -13,7 +13,7 @@ import {
   StyledSwiper,
   StyledSwiperSlide,
 } from "./Slider.styled";
-import {useEffect, useState, useRef, useCallback} from "react";
+import {useEffect, useState, useCallback} from "react";
 import { VideosProps } from "../../types/videos";
 
 interface SliderProps {
@@ -22,9 +22,7 @@ interface SliderProps {
 
 const Slider = ({ topMovies }: SliderProps) => {
   const [videoKey, setVideoKey] = useState<string | null>(null);
-  const [slideIndex, setSlideIndex] = useState(0);
-
-  const timeOutRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [slideIndex, setSlideIndex] = useState(1);
 
   useEffect(() => {
     if (topMovies.length) {
@@ -38,16 +36,15 @@ const Slider = ({ topMovies }: SliderProps) => {
       };
 
       fetch(
-        `https://api.themoviedb.org/3/movie/${topMovies[slideIndex].id}/videos?language=en-US`,
+        `https://api.themoviedb.org/3/movie/${topMovies[slideIndex - 1].id}/videos?language=en-US`,
         options
       )
         .then((response) => response.json())
         .then((response: VideosProps) => {
           const videoLink = `https://www.youtube.com/embed/${response.results[response.results.length - 1].key}?autoplay=1&mute=1&controls=0&disablekb=1&loop=1&start=30`
-          timeOutRef.current = setTimeout(() => setVideoKey(videoLink), 5000);
+          setVideoKey(videoLink)
         })
         .catch((err) => console.error(err));
-        return () => clearTimeout(timeOutRef.current as number)
     }
   }, [topMovies, slideIndex]);
 
@@ -89,8 +86,10 @@ const Slider = ({ topMovies }: SliderProps) => {
           loop={true}
           modules={[Navigation, Pagination, Mousewheel, Keyboard]}
           onSlideChange={(e) => {
-            setVideoKey(null)
-            setSlideIndex(e.activeIndex)
+            if(slideIndex !== e.activeIndex) {
+              setVideoKey(null)
+              setSlideIndex(e.activeIndex)
+            }
           }}
         >
           {topMovies.map(item => {

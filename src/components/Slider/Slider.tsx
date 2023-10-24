@@ -22,7 +22,7 @@ interface SliderProps {
 
 const Slider = ({ topMovies }: SliderProps) => {
   const [videoKey, setVideoKey] = useState<string | null>(null);
-  const [slideIndex, setSlideIndex] = useState(1);
+  const [slideIndex, setSlideIndex] = useState(0);
 
   useEffect(() => {
     if (topMovies.length) {
@@ -36,7 +36,7 @@ const Slider = ({ topMovies }: SliderProps) => {
       };
 
       fetch(
-        `https://api.themoviedb.org/3/movie/${topMovies[slideIndex - 1].id}/videos?language=en-US`,
+        `https://api.themoviedb.org/3/movie/${topMovies[slideIndex].id}/videos?language=en-US`,
         options
       )
         .then((response) => response.json())
@@ -83,13 +83,11 @@ const Slider = ({ topMovies }: SliderProps) => {
           pagination={true}
           mousewheel={true}
           keyboard={true}
-          loop={true}
           modules={[Navigation, Pagination, Mousewheel, Keyboard]}
+          onSwiper={(swiper) => console.log(swiper)}
           onSlideChange={(e) => {
-            if(slideIndex !== e.activeIndex) {
-              setVideoKey(null)
-              setSlideIndex(e.activeIndex)
-            }
+            setVideoKey(null)
+            setSlideIndex(e.activeIndex)
           }}
         >
           {topMovies.map(item => {

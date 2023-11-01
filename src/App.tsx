@@ -1,46 +1,27 @@
-import { useEffect, useState } from "react";
 import Header from "./components/Header/Header";
-import Slider from "./components/Slider/Slider";
-import { MovieProps, MoviesProps } from "./types/movies";
+import { Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import NotFound from "./components/NotFound/NotFound";
+import Movies from "./pages/Movies";
+import TVshows from "./pages/TVshows";
+import MoviePage from "./pages/MoviePage";
+
 
 const App = () => {
-  const [movies, setMovies] = useState<MoviesProps | null>(null);
-
-  useEffect(() => {
-    const options = {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-      },
-    };
-
-    fetch(
-      "https://api.themoviedb.org/3/trending/all/week?language=en-US",
-      options
-    )
-      .then((response) => response.json())
-      .then((response) => setMovies(response))
-      .catch((err) => console.error(err));
-  }, []);
-
-  const getTopMovies = (): MovieProps[] => {
-    if (!movies?.results) {
-      return [];
-    }
-    return movies.results.filter((item) => item.title && item.vote_average && item.backdrop_path).slice(0, 5);
-  };
-
   return (
     <>
       <Header />
-      <Slider topMovies={getTopMovies()} />
+      <main style={{ minHeight: "90vh"}}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/movies" element={<Movies />} />
+          <Route path="/movies/:id" element={<MoviePage />} />
+          <Route path="/tvshows" element={<TVshows />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
     </>
   );
 };
 
 export default App;
-
-// Promese.all - метод на несколько запросов
-// Разобраться что такое зависимое поле в Use Effect

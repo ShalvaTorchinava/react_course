@@ -6,7 +6,8 @@ import "swiper/css/pagination";
 
 
 export const StyledBox = styled.div`
-  height: 90vh;
+  width: 100%;
+  height: 100%;
 `;
 
 export const StyledSwiper = styled(Swiper)`

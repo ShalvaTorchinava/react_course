@@ -1,40 +1,54 @@
 import { Button } from "@mui/material";
-import styled from "styled-components";
 
-const HeaderBox = styled.header`
-  width: 100%;
-  height: 10vh;
-  background-color: black;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
+import {
+  HeaderBox,
+  Logo,
+  StyledButtons,
+  StyledNavLink,
+  StyledSerch,
+  StyledTextField,
+  StyledUl,
+} from "./Header.styled";
+import { Link } from "react-router-dom";
 
-const Logo = styled.h1`
-  color: #e50914;
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 40px;
-  margin-left: 16px;
-  letter-spacing: 2px;
-`;
-
-export default function Header() {
+const Header = () => {
   return (
     <HeaderBox>
-      <a href="#">
-        <Logo>Gacheflix</Logo>
-      </a>
-      <Button
-        variant="outlined"
-        sx={{
-          color: "white",
-          borderColor: "white",
-          "&:hover": { color: "white", borderColor: "#E50914" },
-          marginRight: 2,
-        }}
-      >
-        Sign in
-      </Button>
+      <StyledButtons>
+        <Link to={"/"}>
+          <Logo>Gacheflix</Logo>
+        </Link>
+        <StyledUl>
+          <li>
+            <StyledNavLink to={"/movies"}>Movies</StyledNavLink>
+          </li>
+          <li>
+            <StyledNavLink to={"/tvshows"}>TV Shows</StyledNavLink>
+          </li>
+        </StyledUl>
+      </StyledButtons>
+      <StyledSerch>
+        <StyledTextField
+          id="outlined-basic"
+          label="Search..."
+          variant="outlined"
+          size="small"
+          sx={{width: '20vw'}}
+        />
+        <Button
+          variant="outlined"
+          sx={{
+            color: "white",
+            borderColor: "white",
+            "&:hover": { color: "white", borderColor: "#E50914" },
+            marginRight: 2,
+          }}
+        >
+          Sign in
+        </Button>
+      </StyledSerch>
     </HeaderBox>
   );
-}
+};
+
+export default Header;

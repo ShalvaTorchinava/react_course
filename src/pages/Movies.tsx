@@ -3,7 +3,7 @@ import MovieCard from "../components/MovieCard/MovieCard";
 import styled from "styled-components";
 import Select from "react-select";
 import { MovieList } from "../types/movieslist";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import { Link } from "react-router-dom";
 
 const StyledNavigation = styled.div`
@@ -40,6 +40,19 @@ const StyledCards = styled.div`
 
 const StyledLink = styled(Link)`
   width: calc(100% / 5 - 40px);
+`;
+
+const StyledMoviesLoading = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10%;
+  width: 100%;
+  height: 90vh;
+  font-size: 50px;
+  color: #808080;
+  text-transform: uppercase;
+  gap: 40px;
 `;
 
 interface optionsProps {
@@ -79,13 +92,22 @@ const Movies = () => {
 
   const renderMovies = () => {
     if (!movies.length) {
-      return <h1>Загрузка</h1>;
+      return (
+        <StyledMoviesLoading>
+          <p>Loading</p>
+          <CircularProgress
+            color="inherit"
+            size={200}
+            sx={{ color: "#808080" }}
+          />
+        </StyledMoviesLoading>
+      );
     }
     return (
       <StyledCards>
-        {movies.map((item: MovieList) => {
+        {movies.map((item: MovieList, index: number) => {
           return (
-            <StyledLink to={item.id.toString()} key={item.id}>
+            <StyledLink to={item.id.toString()} key={item.id + index}>
               <MovieCard movie={item} />
             </StyledLink>
           );
@@ -93,8 +115,6 @@ const Movies = () => {
       </StyledCards>
     );
   };
-
-  console.log(movies.filter((item) => item.id === 1139087));
 
   return (
     <StyledBox>

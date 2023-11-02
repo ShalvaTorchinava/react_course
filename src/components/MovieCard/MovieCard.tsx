@@ -21,7 +21,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         <CardMedia
           component="img"
           height="250"
-          image={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
+          image={`https://image.tmdb.org/t/p/w500${movie.backdrop_path}`}
           alt=""
         />
         <CardContent

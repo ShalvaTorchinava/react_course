@@ -24,6 +24,7 @@ const Home = () => {
   const [pageState, setPageState] = useState(PageState.loading);
 
   useEffect(() => {
+    // Ты достаточно часто используешь options - ты можешь вынести это в helpers и импортировать оттуда
     const options = {
       method: "GET",
       headers: {
@@ -32,7 +33,22 @@ const Home = () => {
           "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
       },
     };
+    // Также ты можешь создать папку api и вынести туда все запросы как функции (глобально)
+    // типа:
+    // const getTrendingContent = async () => {
+    //   return await fetch(
+    //       "https://api.themoviedb.org/3/trending/all/week?language=en-US",
+    //       options
+    //   )
+    //       .then((response) => response.json())
+    // }
 
+    // и тут будет что-то типа
+    // await getTrendingContent().then((response) => {
+    //   setTrendingContent(response.results);
+    //   setPageState(PageState.success);
+    // })
+    //     .catch(() => setPageState(PageState.error));
     fetch(
       "https://api.themoviedb.org/3/trending/all/week?language=en-US",
       options

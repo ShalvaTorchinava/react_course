@@ -2,6 +2,7 @@ import React from 'react'
 import { useParams } from 'react-router-dom'
 import ContentBox, { ContentType } from '../components/ContentBox/ContentBox'
 
+// rename TVshowPage => TVShowPage
 const TVshowPage = () => {
   const {id} = useParams()
   return (

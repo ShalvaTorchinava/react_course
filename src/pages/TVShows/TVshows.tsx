@@ -39,10 +39,11 @@ enum PageState {
   success = "success",
   error = "error",
 }
-
+// TVshows => TVShows
 const TVshows = () => {
   const [series, setSeries] = useState<SerieProps[]>([]);
   const [page, setPage] = useState<number>(1);
+  //СategoriesProps - у тебя тут буква русская "С" вместо латинской "C"
   const [selectValue, setSelectValue] = useState<СategoriesProps>(
     seriesCategories[0]
   );
@@ -146,6 +147,7 @@ const TVshows = () => {
             release_date: item.first_air_date,
             video: false,
           };
+          // index - в качестве key нельзя использовать, почитай почему и замени
           return (
             <StyledLink to={item.id.toString()} key={index}>
               <MovieCard content={contentProps} />
@@ -186,9 +188,11 @@ const TVshows = () => {
         {renderSeries()}
       </StyledBoxMovies>
       {pageState === PageState.success && (
+          // ThemeProvider обычно используют один раз и глобально на весь проект
         <ThemeProvider theme={Theme}>
           <Button
             onClick={() => {
+              // Лучше вынеси в отдельную функцию onClick выше
               filters ? setFiltersPage(filtersPage + 1) : setPage(page + 1);
             }}
             variant="outlined"

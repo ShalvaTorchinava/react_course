@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddIcon from "@mui/icons-material/Add";
 import Button from "@mui/material/Button";
+// удаляем не используемые импорты
 import { useLocation, useNavigate, useRoutes } from "react-router-dom";
 import { Box, Modal, ThemeProvider } from "@mui/material";
 import { Theme } from "../../helpers/theme";
@@ -46,6 +47,7 @@ export enum ContentType {
 const ContentBox = ({ contentId, contentType }: ContentBoxProps) => {
   const [movie, setMovie] = useState<MovieDetailsProps | null>(null);
   const [serie, setSerie] = useState<SerieDetailsProps | null>(null);
+  // Если у тебя массив заходит в useState - дефолтное значение его пустой массив вместо null
   const [video, setVideo] = useState<VideoProps[] | null>(null);
   const [pageState, setPageState] = useState(PageState.loading);
   const navigate = useNavigate();
@@ -61,6 +63,7 @@ const ContentBox = ({ contentId, contentType }: ContentBoxProps) => {
   };
 
   const ratingColor = () => {
+    // это надо вынести в helpers функцию
     if (movie) {
       const value = +movie.vote_average.toFixed(1) * 10;
       if (value === 0) {

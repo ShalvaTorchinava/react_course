@@ -1,13 +1,9 @@
-import React from 'react'
-import ContentBox from '../components/ContentBox/ContentBox'
-import { useParams } from 'react-router-dom'
+import ContentBox, { ContentType } from "../components/ContentBox/ContentBox";
+import { useParams } from "react-router-dom";
 
+const MoviePage = () => {
+  const { id } = useParams();
+  return <ContentBox contentId={id} contentType={ContentType.movies} />;
+};
 
-const Test = () => {
-  const {id} = useParams()
-  return (
-    <ContentBox movieId={id}/>
-  )
-}
-
-export default Test
+export default MoviePage;

@@ -1,4 +1,4 @@
-export interface VideosProps {
+export interface VideosPageProps {
     page: number;
     results: VideoProps[];
   }

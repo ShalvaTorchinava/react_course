@@ -1,4 +1,3 @@
-import React from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
@@ -7,21 +6,27 @@ import { CardActionArea } from "@mui/material";
 import Box from "@mui/material/Box";
 import Rating from "@mui/material/Rating";
 import StarIcon from "@mui/icons-material/Star";
-import { MovieList } from "../../types/movieslist";
+import { MovieProps } from "../../types/movies";
+import CardBackground from "../../assets/gacheflix_CardBackground.png";
 
-interface MovieCardProps {
-  movie: MovieList;
+interface ContentCardProps {
+  content: MovieProps;
 }
 
-const MovieCard = ({ movie }: MovieCardProps) => {
-  const rating = movie.vote_average / 2;
+const ContentCard = ({ content }: ContentCardProps) => {
+  const rating = content.vote_average / 2;
+
   return (
     <Card>
       <CardActionArea>
         <CardMedia
           component="img"
           height="250"
-          image={`https://image.tmdb.org/t/p/w500${movie.backdrop_path}`}
+          image={
+            content.backdrop_path
+              ? `https://image.tmdb.org/t/p/w500${content.backdrop_path}`
+              : CardBackground
+          }
           alt=""
         />
         <CardContent
@@ -39,9 +44,9 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             gutterBottom
             variant="h5"
             component="div"
-            sx={{ marginBottom: "unset", fontSize: "1.3em" }}
+            sx={{ marginBottom: "unset", fontSize: "16px" }}
           >
-            {movie.title}
+            {content.title}
           </Typography>
           <Box
             sx={{
@@ -66,4 +71,4 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   );
 };
 
-export default MovieCard;
+export default ContentCard;

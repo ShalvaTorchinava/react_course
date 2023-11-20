@@ -1,7 +1,6 @@
 import { Navigation, Pagination, Mousewheel, Keyboard } from "swiper/modules";
 import "swiper/css/effect-fade";
 import Button from "@mui/material/Button";
-import { MovieProps } from "../../types/movies";
 import {
   StyledBox,
   StyledIFrame,
@@ -11,25 +10,30 @@ import {
   StyledSwiper,
   StyledSwiperSlide,
 } from "./Slider.styled";
-import { useEffect, useState, useCallback } from "react";
-import { VideosProps } from "../../types/videos";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { VideosPageProps } from "../../types/videos";
 import { Link } from "react-router-dom";
+import { ThemeProvider } from "@mui/material";
+import { Theme } from "../../helpers/theme";
+import { TrendingContentProps } from "../../types/trending";
 
 interface SliderProps {
-  topMovies: MovieProps[];
+  topContent: TrendingContentProps[];
 }
 
-const Slider = ({ topMovies }: SliderProps) => {
+const Slider = ({ topContent }: SliderProps) => {
   const [videoKey, setVideoKey] = useState<string | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
-  const [showBanner, setShowBanner] = useState(1)
+  const [showBanner, setShowBanner] = useState(1);
+  const showBannerTimeOutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    setTimeout(() => setShowBanner(0), 5000)
-  }, [videoKey])
+    showBannerTimeOutRef.current = setTimeout(() => setShowBanner(0), 5000);
+    return () => clearTimeout(showBannerTimeOutRef.current!);
+  }, [videoKey]);
 
   useEffect(() => {
-    if (topMovies.length) {
+    if (topContent.length) {
       const options = {
         method: "GET",
         headers: {
@@ -40,11 +44,11 @@ const Slider = ({ topMovies }: SliderProps) => {
       };
 
       fetch(
-        `https://api.themoviedb.org/3/movie/${topMovies[slideIndex].id}/videos?language=en-US`,
+        `https://api.themoviedb.org/3/movie/${topContent[slideIndex].id}/videos?language=en-US`,
         options
       )
         .then((response) => response.json())
-        .then((response: VideosProps) => {
+        .then((response: VideosPageProps) => {
           const videoLink = `https://www.youtube.com/embed/${
             response.results[response.results.length - 1].key
           }?autoplay=1&mute=1&controls=0&disablekb=1&loop=1&playlist=${
@@ -52,17 +56,18 @@ const Slider = ({ topMovies }: SliderProps) => {
           }&start=30`;
           setVideoKey(videoLink);
         })
-        .catch((err) => console.error(err));
+        .catch((err) => console.log(err));
     }
-  }, [topMovies, slideIndex]);
+  }, [topContent, slideIndex]);
 
   const renderSliderData = useCallback(
-    (item: MovieProps) => {
+    (item: TrendingContentProps) => {
       if (!videoKey) {
         return (
           <StyledImg
             src={`https://image.tmdb.org/t/p/original${item.backdrop_path}`}
             alt=""
+            style={{height: '100%', objectFit: 'cover'}}
           />
         );
       }
@@ -80,7 +85,7 @@ const Slider = ({ topMovies }: SliderProps) => {
           <StyledImg
             src={`https://image.tmdb.org/t/p/original${item.backdrop_path}`}
             alt=""
-            style={{ position: "absolute", opacity: showBanner }}
+            style={{ position: "absolute", opacity: showBanner, height: '100%', objectFit: 'cover' }}
           />
         </>
       );
@@ -88,9 +93,6 @@ const Slider = ({ topMovies }: SliderProps) => {
     [videoKey, showBanner]
   );
 
-  if (!topMovies) {
-    return <h1>Загрузка</h1>;
-  }
   return (
     <>
       <StyledBox>
@@ -101,13 +103,13 @@ const Slider = ({ topMovies }: SliderProps) => {
           mousewheel={true}
           keyboard={true}
           modules={[Navigation, Pagination, Mousewheel, Keyboard]}
-          onSwiper={(swiper) => console.log(swiper)}
           onSlideChange={(e) => {
             setVideoKey(null);
             setSlideIndex(e.activeIndex);
+            setShowBanner(1);
           }}
         >
-          {topMovies.map((item) => {
+          {topContent.map((item) => {
             return (
               <StyledSwiperSlide key={item.id}>
                 {renderSliderData(item)}
@@ -117,18 +119,15 @@ const Slider = ({ topMovies }: SliderProps) => {
                   </StyledSliderDescription>
                   <div>
                     <Link to={`${item.media_type}s/${item.id.toString()}`}>
-                      <Button
-                        variant="contained"
-                        size="large"
-                        sx={{
-                          backgroundColor: "#fff",
-                          color: "#000000",
-                          fontWeight: "bold",
-                          "&:hover": { backgroundColor: "#fff" },
-                        }}
-                      >
-                        Go to show
-                      </Button>
+                      <ThemeProvider theme={Theme}>
+                        <Button
+                          variant="contained"
+                          size="medium"
+                          sx={{'@media (max-width: 500px)': {fontSize: '10px'}}}
+                        >
+                          Go to show
+                        </Button>
+                      </ThemeProvider>
                     </Link>
                   </div>
                 </StyledSliderBlock>

@@ -4,7 +4,6 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-
 export const StyledBox = styled.div`
   width: 100%;
   height: 100%;
@@ -46,6 +45,7 @@ export const StyledIFrame = styled.iframe`
 `;
 
 export const StyledSliderDescription = styled.div`
+  width: 70%;
   color: #fff;
   font-size: 30px;
   font-weight: 500;
@@ -54,4 +54,4 @@ export const StyledSliderDescription = styled.div`
 
 export const StyledImg = styled.img`
   width: 100%;
-`
+`;

@@ -1,11 +1,11 @@
 import Select from "react-select";
-import { СategoriesProps } from "../../types/categores";
+import { CategoriesProps } from "../../types/categores";
 import { PageState } from "../../pages/Movies/Movies";
 
 interface SorterProps {
-  categories: СategoriesProps[];
-  selectValue: СategoriesProps;
-  setSelectValue(selectValue: СategoriesProps): void;
+  categories: CategoriesProps[];
+  selectValue: CategoriesProps;
+  setSelectValue(selectValue: CategoriesProps): void;
   clearData: () => void;
   page: number;
   setPage(page: number): void;

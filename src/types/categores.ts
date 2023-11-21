@@ -1,4 +1,4 @@
-export interface СategoriesProps {
+export interface CategoriesProps {
   value: SortFiltersKeys;
   label: string;
 }

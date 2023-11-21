@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import MovieCard from "../../components/ContentCard/ContentCard";
-import { Button, ThemeProvider } from "@mui/material";
+import { Button } from "@mui/material";
 import { Theme } from "../../helpers/theme";
-import { GenresProps, typeGenres } from "../../types/genres";
+import { GenresProps, TypeGenres } from "../../types/genres";
 import { Dayjs } from "dayjs";
 import Skeleton from "@mui/material/Skeleton";
 import Sorter from "../../components/Sorter/Sorter";
 import { MovieProps } from "../../types/movies";
 import Filter from "../../components/Filter/Filter";
 import Error from "../../components/Error/Error";
-import { SortFiltersProps, СategoriesProps } from "../../types/categores";
+import { SortFiltersProps, CategoriesProps } from "../../types/categores";
 import {
   SkeletonCards,
   StyledBox,
@@ -18,7 +18,8 @@ import {
   StyledLink,
   StyledNavigation,
 } from "./Movies.styled";
-import { moviesCategories } from "../../helpers/sortervalues";
+import { moviesCategories } from "../../helpers/sorterValues";
+import { getMoviesByCategories, getMoviesByFilters } from "../../api/api";
 
 const sortFilters: SortFiltersProps = {
   popular: "popularity.desc",
@@ -43,7 +44,7 @@ export enum PageState {
 const Movies = () => {
   const [movies, setMovies] = useState<MovieProps[]>([]);
   const [page, setPage] = useState<number>(1);
-  const [selectValue, setSelectValue] = useState<СategoriesProps>(
+  const [selectValue, setSelectValue] = useState<CategoriesProps>(
     moviesCategories[0]
   );
   const [filters, setFilters] = useState<FilterValuesProps | null>(null);
@@ -53,20 +54,7 @@ const Movies = () => {
 
   useEffect(() => {
     if (!filters) {
-      const options = {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-        },
-      };
-
-      fetch(
-        `https://api.themoviedb.org/3/movie/${selectValue.value}?language=en-US&page=${page}`,
-        options
-      )
-        .then((response) => response.json())
+      getMoviesByCategories(selectValue, page)
         .then((response) => {
           setMovies([...movies, ...response.results]);
           setPageState(PageState.success);
@@ -77,35 +65,12 @@ const Movies = () => {
 
   useEffect(() => {
     if (filters) {
-      const options = {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-        },
-      };
-
-      fetch(
-        `https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=${filtersPage}&primary_release_date.gte=${
-          filters.dateFrom
-        }&primary_release_date.lte=${filters.dateTo}&sort_by=${
-          sortFilters[selectValue.value]
-        }&vote_average.gte=${filters.userScore[0]}&vote_average.lte=${
-          filters.userScore[1]
-        }&with_genres=${filters.genres
-          .map((item) => item.id)
-          .join("%7C")}&with_runtime.gte=${
-          filters.runtime[0]
-        }&with_runtime.lte=${filters.runtime[1]}`,
-        options
-      )
-        .then((response) => response.json())
+      getMoviesByFilters(filtersPage, filters, sortFilters, selectValue)
         .then((response) => setMovies([...movies, ...response.results]))
         .catch((err) => console.error(err))
         .finally(() => {
           setOpen(false);
-          setPageState(PageState.success)
+          setPageState(PageState.success);
         });
     }
   }, [filters, filtersPage, selectValue]);
@@ -113,6 +78,10 @@ const Movies = () => {
   const clearData = () => {
     return setMovies([]);
   };
+
+  const loadingPage = () => {
+    filters ? setFiltersPage(filtersPage + 1) : setPage(page + 1);
+  }
 
   const renderMovies = () => {
     if (pageState === PageState.loading) {
@@ -139,9 +108,9 @@ const Movies = () => {
     }
     return (
       <StyledCards>
-        {movies.map((item: MovieProps, index: number) => {
+        {movies.map((item: MovieProps) => {
           return (
-            <StyledLink to={item.id.toString()} key={index}>
+            <StyledLink to={item.id.toString()} key={item.id}>
               <MovieCard content={item} />
             </StyledLink>
           );
@@ -173,18 +142,15 @@ const Movies = () => {
             setFiltersPage={setFiltersPage}
             open={open}
             setOpen={setOpen}
-            typeGenres={typeGenres.movies}
+            typeGenres={TypeGenres.movies}
             setPageState={setPageState}
           />
         </StyledNavigation>
         {renderMovies()}
       </StyledBoxMovies>
       {pageState === PageState.success && (
-        <ThemeProvider theme={Theme}>
           <Button
-            onClick={() => {
-              filters ? setFiltersPage(filtersPage + 1) : setPage(page + 1);
-            }}
+            onClick={() => loadingPage()}
             variant="outlined"
             sx={{
               marginBottom: "20px",
@@ -194,7 +160,6 @@ const Movies = () => {
           >
             More
           </Button>
-        </ThemeProvider>
       )}
     </StyledBox>
   );

@@ -1,4 +1,4 @@
-import { Button, TextField, ThemeProvider } from "@mui/material";
+import { Button, TextField} from "@mui/material";
 import {
   HeaderBox,
   StyledButtons,
@@ -24,10 +24,10 @@ import {
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { SingleContentProps } from "../../types/search";
-import { Theme } from "../../helpers/theme";
 import Drawer from "@mui/material/Drawer";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
+import { getSearchContent } from "../../api/api";
 
 const Header = () => {
   const [searchContent, setSearchContent] = useState<SingleContentProps[] | []>(
@@ -49,7 +49,7 @@ const Header = () => {
 
   const serchHandler = (value: string) => {
     setSearchContent([]);
-    setSearchValue(value)
+    setSearchValue(value);
   };
 
   const filterContent = (searchContent: SingleContentProps[] | null) => {
@@ -63,20 +63,7 @@ const Header = () => {
 
   useEffect(() => {
     if (searchValue.length > 2) {
-      const options = {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-        },
-      };
-
-      fetch(
-        `https://api.themoviedb.org/3/search/multi?query=${searchValue}&include_adult=false&language=en-US&page=${page}`,
-        options
-      )
-        .then((response) => response.json())
+      getSearchContent(searchValue, page)
         .then((response) =>
           setSearchContent([...searchContent, ...response.results])
         )
@@ -169,7 +156,6 @@ const Header = () => {
   };
 
   return (
-    <ThemeProvider theme={Theme}>
       <HeaderBox>
         <StyledButtons>
           <Link to={"/"}>
@@ -209,11 +195,13 @@ const Header = () => {
             sx={{ Width: "200px" }}
             onChange={(e) => serchHandler(e.target.value)}
           />
-          <StyledSerchButton onClick={() => {
-            setSearchValue('')
-            setSearchContent([])
-          }}>
-            <CloseIcon sx={{fill: '#fff'}}/>
+          <StyledSerchButton
+            onClick={() => {
+              setSearchValue("");
+              setSearchContent([]);
+            }}
+          >
+            <CloseIcon sx={{ fill: "#fff" }} />
           </StyledSerchButton>
           {renderSerchContent()}
           <Button
@@ -227,7 +215,6 @@ const Header = () => {
           </Button>
         </StyledSerch>
       </HeaderBox>
-    </ThemeProvider>
   );
 };
 

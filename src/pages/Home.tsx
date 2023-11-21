@@ -4,6 +4,7 @@ import { TrendingContentProps } from "../types/trending";
 import Background from "../assets/gacheflix_background.png";
 import styled from "styled-components";
 import Error from "../components/Error/Error";
+import { getTrendingContent } from "../api/api";
 
 const BackgroundImg = styled.img`
   width: 100%;
@@ -19,25 +20,12 @@ enum PageState {
 
 const Home = () => {
   const [trendingContent, setTrendingContent] = useState<
-    TrendingContentProps[] | null
-  >(null);
+    TrendingContentProps[] | []
+  >([]);
   const [pageState, setPageState] = useState(PageState.loading);
 
   useEffect(() => {
-    const options = {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-      },
-    };
-
-    fetch(
-      "https://api.themoviedb.org/3/trending/all/week?language=en-US",
-      options
-    )
-      .then((response) => response.json())
+    getTrendingContent()
       .then((response) => {
         setTrendingContent(response.results);
         setPageState(PageState.success);
@@ -46,7 +34,7 @@ const Home = () => {
   }, []);
 
   const getTopContent = (): TrendingContentProps[] => {
-    if (!trendingContent) {
+    if (trendingContent.length === 0) {
       return [];
     }
     return trendingContent

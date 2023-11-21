@@ -1,6 +1,6 @@
 import { Dayjs } from "dayjs";
 import { useState, useEffect } from "react";
-import { GenresProps, typeGenres } from "../../types/genres";
+import { GenresProps, TypeGenres } from "../../types/genres";
 import { SerieProps } from "../../types/tvshows";
 import {
   StyledBox,
@@ -8,17 +8,17 @@ import {
   StyledCards,
   StyledLink,
   StyledNavigation,
-} from "./TVshows.styled";
+} from "./TVShows.styled";
 import Skeleton from "@mui/material/Skeleton";
 import Error from "../../components/Error/Error";
 import MovieCard from "../../components/ContentCard/ContentCard";
 import Sorter from "../../components/Sorter/Sorter";
 import Filter from "../../components/Filter/Filter";
-import { Theme } from "../../helpers/theme";
-import { Button, ThemeProvider } from "@mui/material";
+import { Button} from "@mui/material";
 import { MovieProps } from "../../types/movies";
-import { seriesCategories } from "../../helpers/sortervalues";
-import { SortFiltersProps, СategoriesProps } from "../../types/categores";
+import { seriesCategories } from "../../helpers/sorterValues";
+import { SortFiltersProps, CategoriesProps } from "../../types/categores";
+import { getSeriesByCatetgories, getSeriesByFilters } from "../../api/api";
 
 const sortFilters: SortFiltersProps = {
   popular: "popularity.desc",
@@ -40,10 +40,10 @@ enum PageState {
   error = "error",
 }
 
-const TVshows = () => {
+const TVShows = () => {
   const [series, setSeries] = useState<SerieProps[]>([]);
   const [page, setPage] = useState<number>(1);
-  const [selectValue, setSelectValue] = useState<СategoriesProps>(
+  const [selectValue, setSelectValue] = useState<CategoriesProps>(
     seriesCategories[0]
   );
   const [filters, setFilters] = useState<FilterValuesProps | null>(null);
@@ -53,20 +53,7 @@ const TVshows = () => {
 
   useEffect(() => {
     if (!filters) {
-      const options = {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-        },
-      };
-
-      fetch(
-        `https://api.themoviedb.org/3/tv/${selectValue.value}?language=en-US&page=${page}`,
-        options
-      )
-        .then((response) => response.json())
+      getSeriesByCatetgories(selectValue, page)
         .then((response) => {
           setSeries([...series, ...response.results]);
           setPageState(PageState.success);
@@ -77,34 +64,11 @@ const TVshows = () => {
 
   useEffect(() => {
     if (filters) {
-      const options = {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-        },
-      };
-      fetch(
-        `https://api.themoviedb.org/3/discover/tv?first_air_date.gte=${
-          filters.dateFrom
-        }&first_air_date.lte=${
-          filters.dateTo
-        }&include_adult=false&include_null_first_air_dates=false&language=en-US&page=1&sort_by=${
-          sortFilters[selectValue.value]
-        }&vote_average.gte=${filters.userScore[0]}&vote_average.lte=${
-          filters.userScore[1]
-        }&with_genres=${filters.genres
-          .map((item) => item.id)
-          .join("%7C")}&with_runtime.gte=${
-          filters.runtime[0]
-        }&with_runtime.gte=${filters.runtime[0]}&with_runtime.lte=${
-          filters.runtime[1]
-        }`,
-        options
-      )
-        .then((response) => response.json())
-        .then((response) => setSeries([...series, ...response.results]))
+      getSeriesByFilters(filters, sortFilters, selectValue)
+        .then((response) => {
+          setSeries([...series, ...response.results]);
+          setPageState(PageState.success);
+        })
         .catch((err) => console.error(err))
         .finally(() => setOpen(false));
     }
@@ -113,6 +77,10 @@ const TVshows = () => {
   const clearData = () => {
     return setSeries([]);
   };
+
+  const loadingPage = () => {
+    filters ? setFiltersPage(filtersPage + 1) : setPage(page + 1);
+  }
 
   const renderSeries = () => {
     if (pageState === PageState.loading) {
@@ -138,7 +106,7 @@ const TVshows = () => {
     }
     return (
       <StyledCards>
-        {series.map((item: SerieProps, index: number) => {
+        {series.map((item: SerieProps) => {
           const contentProps: MovieProps = {
             ...item,
             title: item.name,
@@ -147,7 +115,7 @@ const TVshows = () => {
             video: false,
           };
           return (
-            <StyledLink to={item.id.toString()} key={index}>
+            <StyledLink to={item.id.toString()} key={item.id}>
               <MovieCard content={contentProps} />
             </StyledLink>
           );
@@ -179,18 +147,15 @@ const TVshows = () => {
             setFiltersPage={setFiltersPage}
             open={open}
             setOpen={setOpen}
-            typeGenres={typeGenres.series}
+            typeGenres={TypeGenres.series}
             setPageState={setPageState}
           />
         </StyledNavigation>
         {renderSeries()}
       </StyledBoxMovies>
       {pageState === PageState.success && (
-        <ThemeProvider theme={Theme}>
           <Button
-            onClick={() => {
-              filters ? setFiltersPage(filtersPage + 1) : setPage(page + 1);
-            }}
+            onClick={() => loadingPage()}
             variant="outlined"
             sx={{
               marginBottom: "20px",
@@ -200,10 +165,9 @@ const TVshows = () => {
           >
             More
           </Button>
-        </ThemeProvider>
       )}
     </StyledBox>
   );
 };
 
-export default TVshows;
+export default TVShows;

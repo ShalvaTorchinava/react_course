@@ -3,7 +3,7 @@ export interface GenresProps {
   name: string;
 }
 
-export enum typeGenres {
+export enum TypeGenres {
   movies = 'movie',
   series = 'tv'
 }

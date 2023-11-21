@@ -13,9 +13,8 @@ import {
 import { useEffect, useState, useCallback, useRef } from "react";
 import { VideosPageProps } from "../../types/videos";
 import { Link } from "react-router-dom";
-import { ThemeProvider } from "@mui/material";
-import { Theme } from "../../helpers/theme";
 import { TrendingContentProps } from "../../types/trending";
+import { getSliderContent } from "../../api/api";
 
 interface SliderProps {
   topContent: TrendingContentProps[];
@@ -34,20 +33,7 @@ const Slider = ({ topContent }: SliderProps) => {
 
   useEffect(() => {
     if (topContent.length) {
-      const options = {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-        },
-      };
-
-      fetch(
-        `https://api.themoviedb.org/3/movie/${topContent[slideIndex].id}/videos?language=en-US`,
-        options
-      )
-        .then((response) => response.json())
+      getSliderContent(topContent, slideIndex)
         .then((response: VideosPageProps) => {
           const videoLink = `https://www.youtube.com/embed/${
             response.results[response.results.length - 1].key
@@ -67,7 +53,7 @@ const Slider = ({ topContent }: SliderProps) => {
           <StyledImg
             src={`https://image.tmdb.org/t/p/original${item.backdrop_path}`}
             alt=""
-            style={{height: '100%', objectFit: 'cover'}}
+            style={{ height: "100%", objectFit: "cover" }}
           />
         );
       }
@@ -85,7 +71,12 @@ const Slider = ({ topContent }: SliderProps) => {
           <StyledImg
             src={`https://image.tmdb.org/t/p/original${item.backdrop_path}`}
             alt=""
-            style={{ position: "absolute", opacity: showBanner, height: '100%', objectFit: 'cover' }}
+            style={{
+              position: "absolute",
+              opacity: showBanner,
+              height: "100%",
+              objectFit: "cover",
+            }}
           />
         </>
       );
@@ -119,15 +110,15 @@ const Slider = ({ topContent }: SliderProps) => {
                   </StyledSliderDescription>
                   <div>
                     <Link to={`${item.media_type}s/${item.id.toString()}`}>
-                      <ThemeProvider theme={Theme}>
                         <Button
                           variant="contained"
                           size="medium"
-                          sx={{'@media (max-width: 500px)': {fontSize: '10px'}}}
+                          sx={{
+                            "@media (max-width: 500px)": { fontSize: "10px" },
+                          }}
                         >
                           Go to show
                         </Button>
-                      </ThemeProvider>
                     </Link>
                   </div>
                 </StyledSliderBlock>

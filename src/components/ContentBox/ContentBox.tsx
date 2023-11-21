@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import AddIcon from "@mui/icons-material/Add";
 import Button from "@mui/material/Button";
-import { useLocation, useNavigate, useRoutes } from "react-router-dom";
-import { Box, Modal, ThemeProvider } from "@mui/material";
-import { Theme } from "../../helpers/theme";
+import { useNavigate } from "react-router-dom";
+import { Box, Modal} from "@mui/material";
 import { MovieDetailsProps } from "../../types/movies";
 import { VideoProps } from "../../types/videos";
 import {
@@ -26,6 +25,8 @@ import {
 import Error from "../Error/Error";
 import SkeletonContentBox from "./SkeletonContentBox";
 import { SerieDetailsProps } from "../../types/tvshows";
+import getRatingColor from "../../helpers/getRatingColor";
+import { getContentById, getVideoByContent } from "../../api/api";
 
 interface ContentBoxProps {
   contentId: string | undefined;
@@ -46,7 +47,7 @@ export enum ContentType {
 const ContentBox = ({ contentId, contentType }: ContentBoxProps) => {
   const [movie, setMovie] = useState<MovieDetailsProps | null>(null);
   const [serie, setSerie] = useState<SerieDetailsProps | null>(null);
-  const [video, setVideo] = useState<VideoProps[] | null>(null);
+  const [video, setVideo] = useState<VideoProps[] | []>([]);
   const [pageState, setPageState] = useState(PageState.loading);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -54,89 +55,23 @@ const ContentBox = ({ contentId, contentType }: ContentBoxProps) => {
   const handleClose = () => setOpen(false);
 
   const getTrailers = () => {
-    if (video?.length && video[0].key) {
+    if (video.length > 0 && video[0].key) {
       const result = video.filter((item) => item.type === "Trailer");
       return result[result.length - 1].key;
     } else return null;
   };
 
-  const ratingColor = () => {
-    if (movie) {
-      const value = +movie.vote_average.toFixed(1) * 10;
-      if (value === 0) {
-        return "#494949";
-      }
-      if (value <= 30) {
-        return "#d11313";
-      }
-      if (value <= 50) {
-        return "#d15f13";
-      }
-      if (value <= 75) {
-        return "#d1ab13";
-      }
-      if (value <= 100) {
-        return `#13d116`;
-      }
-    } else if (serie) {
-      const value = +serie.vote_average.toFixed(1) * 10;
-      if (value === 0) {
-        return "#494949";
-      }
-      if (value <= 30) {
-        return "#d11313";
-      }
-      if (value <= 50) {
-        return "#d15f13";
-      }
-      if (value <= 75) {
-        return "#d1ab13";
-      }
-      if (value <= 100) {
-        return `#13d116`;
-      }
-    } else {
-      return "#494949";
-    }
-  };
-
   useEffect(() => {
-    if (contentType === ContentType.movies) {
-      const options = {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-        },
-      };
-
-      fetch(
-        `https://api.themoviedb.org/3/movie/${contentId}?language=en-US`,
-        options
-      )
-        .then((response) => response.json())
+    if (contentType === ContentType.movies && contentId) {
+      getContentById(contentId, "movie")
         .then((response) => {
           response.id ? setMovie(response) : navigate("/notfound");
           setPageState(PageState.success);
         })
         .catch(() => setPageState(PageState.error));
     }
-    if (contentType === ContentType.series) {
-      const options = {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-        },
-      };
-
-      fetch(
-        `https://api.themoviedb.org/3/tv/${contentId}?language=en-US`,
-        options
-      )
-        .then((response) => response.json())
+    if (contentType === ContentType.series && contentId) {
+      getContentById(contentId, "tv")
         .then((response) => {
           response.id ? setSerie(response) : navigate("/notfound");
           setPageState(PageState.success);
@@ -146,29 +81,17 @@ const ContentBox = ({ contentId, contentType }: ContentBoxProps) => {
   }, [movie, serie]);
 
   useEffect(() => {
-    const options = {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1ZjNmYjVmMjM4MzhlY2QwNjFlNDRmNTAwNmEwNzc4ZCIsInN1YiI6IjY1MzJkMzhlOWFjNTM1MDg3ODZhNDQ5YSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.LR7cI5OQH0aEBZJJwxYo618dZNY-qzzVDekOxvXAbbs",
-      },
-    };
-
-    fetch(
-      `https://api.themoviedb.org/3/${contentType}/${contentId}/videos?language=en-US`,
-      options
-    )
-      .then((response) => response.json())
-      .then((response) => setVideo(response.results))
-      .catch((err) => console.error(err));
+    if (contentId) {
+      getVideoByContent(contentType, contentId)
+        .then((response) => setVideo(response.results))
+        .catch((err) => console.error(err));
+    }
   }, []);
 
   const renderTrailersButton = () => {
     if (getTrailers()) {
       return (
         <>
-          <ThemeProvider theme={Theme}>
             <Button
               onClick={handleOpen}
               variant="contained"
@@ -194,16 +117,13 @@ const ContentBox = ({ contentId, contentType }: ContentBoxProps) => {
                 ></iframe>
               </Box>
             </Modal>
-          </ThemeProvider>
         </>
       );
     } else {
       return (
-        <ThemeProvider theme={Theme}>
           <Button variant="outlined" disabled>
             No trailer
           </Button>
-        </ThemeProvider>
       );
     }
   };
@@ -248,7 +168,7 @@ const ContentBox = ({ contentId, contentType }: ContentBoxProps) => {
               {data.genres.map((item) => item.name).join(", ")}
             </StyledContentGenres>
             <StyledContentButtons>
-              <StyledContentRating color={ratingColor()}>
+              <StyledContentRating color={getRatingColor(movie, serie)}>
                 {data.vote_average === 0
                   ? "NR"
                   : +data.vote_average.toFixed(1) * 10 + "%"}

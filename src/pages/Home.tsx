@@ -5,6 +5,7 @@ import Background from "../assets/gacheflix_background.png";
 import styled from "styled-components";
 import Error from "../components/Error/Error";
 import { getTrendingContent } from "../api/api";
+import Loader from "../Loader/Loader";
 
 const BackgroundImg = styled.img`
   width: 100%;
@@ -23,6 +24,17 @@ const Home = () => {
     TrendingContentProps[] | []
   >([]);
   const [pageState, setPageState] = useState(PageState.loading);
+  const [loaderState, setLoaderState] = useState<Boolean>(
+    Boolean(sessionStorage.getItem("firstLoad"))
+  );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoaderState(true);
+      sessionStorage.setItem("firstLoad", "true");
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     getTrendingContent()
@@ -41,6 +53,10 @@ const Home = () => {
       .filter((item) => item.title && item.vote_average && item.backdrop_path)
       .slice(0, 5);
   };
+
+  if (loaderState === false) {
+    return <Loader />;
+  }
 
   if (pageState === PageState.loading) {
     return (
